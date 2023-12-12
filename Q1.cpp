@@ -1,15 +1,22 @@
 #include <iostream>
 #include <fstream>
 #include<string>
+
 using namespace std;
+
+const int skip = 90000;
+
 void mainMenu();
+
 class Student
 {
-    int option;
     string name, roll_num, age, contact, course, attendance, marks;
+    int option;
 
 public:
     void studentEnrolMenu();
+    //void attendanceMenu();
+    //void marksMenu();
     void Enrol();
     void Remove();
     void Edit();
@@ -18,26 +25,11 @@ public:
 
 class Course
 {
+    int option;
+
 public:
     void courseRegMenu();
-};
-
-class Attendance
-{
-public:
-    void attendanceMenu();
-};
-
-class Marks
-{
-public:
-    void marksMenu();
-};
-
-class Withdraw
-{
-public:
-    void courseWithdrawMenu();
+    //void courseWithdrawMenu();
 };
 
 class System
@@ -54,9 +46,6 @@ void mainMenu()
     int option;
     Student st;
     Course cr;
-    Attendance at;
-    Marks mk;
-    Withdraw wd;
 
     cout << "Choose an option from the menu\n";
     cout << "1- Enroll a student\n2- Course Registration\n3- Attendance\n4- Marks\n5- Course Withdraw\n6- Exit\n";
@@ -72,13 +61,13 @@ void mainMenu()
         cr.courseRegMenu();
         break;
     case 3:
-        at.attendanceMenu();
+        //st.attendanceMenu();
         break;
     case 4:
-        mk.marksMenu();
+        //st.marksMenu();
         break;
     case 5:
-        wd.courseWithdrawMenu();
+        //cr.courseWithdrawMenu();
         break;
     case 6:
         cout << "Program Terminated";
@@ -111,21 +100,21 @@ void Student::studentEnrolMenu()
 
 void Student::Enrol()
 {
-    ofstream writeStudent("students.txt", ios::app); //open file in append mode
+    ofstream writeStudent("students.txt", ios::app); //opening file in append mode
 
-    if (!writeStudent.is_open())
+    if (!writeStudent.is_open()) //checking if the file is successfully opened or not
         cout << "Error opening the file for writing!" << endl;
 
-    cout << "Enter name, roll number, age, contact, course, attendance and marks (comma-separated)\n";
-    getline(cin, name, ',');
-    getline(cin, roll_num, ',');
-    getline(cin, age, ',');
-    getline(cin, contact, ',');
-    getline(cin, course, ',');
-    getline(cin, attendance, ',');
+    cout << "Enter name, roll number, age, contact, course, attendance and marks (with spaces)\n";
+    getline(cin, name, ' ');
+    getline(cin, roll_num, ' ');
+    getline(cin, age, ' ');
+    getline(cin, contact, ' ');
+    getline(cin, course, ' ');
+    getline(cin, attendance, ' ');
     getline(cin, marks);
 
-    writeStudent << name << "," << roll_num << "," << age << "," << contact << "," << course << "," << attendance << "," << marks << "\n";
+    writeStudent << name << " " << roll_num << " " << age << " " << contact << " " << course << " " << attendance << " " << marks;
     writeStudent.close();
 
     cout << "Student information added to the file successfully!" << endl;
@@ -135,30 +124,124 @@ void Student::Enrol()
 
 void Student::Remove()
 {
-    cout << "a";
+    int index;
+    ifstream readStudent("students.txt");
+
+    if (!readStudent.is_open()) //checking if the file is successfully opened or not
+        cout << "Error while opening the file for writing!" << endl;
+
+    else
+    {
+        display();
+
+        cout << "\nEnter the index (starting from zero index) of the student you want to remove: ";
+        cin >> index;
+
+        for (int i = 0; i < index; ++i)
+            readStudent.ignore(skip, '\n');
+
+        getline(readStudent, name, ' ');
+        getline(readStudent, roll_num, ' ');
+        getline(readStudent, age, ' ');
+        getline(readStudent, contact, ' ');
+        getline(readStudent, course, ' ');
+        getline(readStudent, attendance, ' ');
+        getline(readStudent, marks);
+        readStudent.close();
+
+        cout << "Student to be removed:\nName: " << name << " Roll Number: " << roll_num << " Age: " << age << " Contact: " << contact << " Course: " << course << " Attendance: " << attendance << " Marks: " << marks << endl;
+
+        ofstream writeStudentTemp("newfile.txt");
+        if (writeStudentTemp.is_open())
+        {
+            ifstream readStudentTemp("students.txt");
+            if (readStudentTemp.is_open())
+            {
+                string line;
+                while (getline(readStudentTemp, line))
+                    if (line != (name + ' ' + roll_num + ' ' + age + ' ' + contact + ' ' + course + ' ' + attendance + ' ' + marks))
+                        writeStudentTemp << line << '\n';
+                readStudentTemp.close();
+            }
+            writeStudentTemp.close();
+        }
+
+        if (remove("students.txt") == 0 && rename("newfile.txt", "students.txt") == 0)
+            cout << "Student you selected has been successfully removed\n";
+        else
+            cout << "There is an Error while removing the student!\n";
+    }
 }
 
 void Student::Edit()
 {
-    cout << "a";
+    int index;
+    ifstream readStudent("students.txt");
+    string tempName, tempRoll_num, tempAge, tempContact, tempCourse, tempAttendance, tempMarks;
+    if (!readStudent.is_open()) //checking if the file is successfully opened or not
+        cout << "Error while opening the file for writing!" << endl;
+
+    else
+    {
+        display();
+
+        cout << "\nEnter the index (starting from zero index) of the student you want to Edit: ";
+        cin >> index;
+
+        for (int i = 0; i < index; ++i)
+            readStudent.ignore(skip, '\n');
+
+        getline(readStudent, name, ' ');
+        getline(readStudent, roll_num, ' ');
+        getline(readStudent, age, ' ');
+        getline(readStudent, contact, ' ');
+        getline(readStudent, course, ' ');
+        getline(readStudent, attendance, ' ');
+        getline(readStudent, marks);
+        readStudent.close();
+
+        cout << "Student to be Edited:\nName: " << name << " Roll Number: " << roll_num << " Age: " << age << " Contact: " << contact << " Course: " << course << " Attendance: " << attendance << " Marks: " << marks << endl;
+
+        ofstream writeStudentTemp("newfile.txt");
+        if (writeStudentTemp.is_open())
+        {
+            ifstream readStudentTemp("students.txt");
+            if (readStudentTemp.is_open())
+            {
+                string line;
+                while (getline(readStudentTemp, line))
+                {
+                    if (line != (name + ' ' + roll_num + ' ' + age + ' ' + contact + ' ' + course + ' ' + attendance + ' ' + marks))
+                        writeStudentTemp << line << '\n';
+                    else
+                    {
+                        cout << "Edit name, roll number, age, contact, course, attendance and marks (with spaces):\n";
+                        getline(cin, tempName, ' ');
+                        getline(cin, tempRoll_num, ' ');
+                        getline(cin, tempAge, ' ');
+                        getline(cin, tempContact, ' ');
+                        getline(cin, tempCourse, ' ');
+                        getline(cin, tempAttendance, ' ');
+                        getline(cin, tempMarks);
+
+                        line = tempName + ' ' + tempRoll_num + ' ' + tempAge + ' ' + tempContact + ' ' + tempCourse + ' ' + tempAttendance + ' ' + tempMarks;
+                        writeStudentTemp << line << '\n';
+                    }
+                }
+                readStudentTemp.close();
+            }
+            writeStudentTemp.close();
+        }
+
+        if (remove("students.txt") == 0 && rename("newfile.txt", "students.txt") == 0)
+            cout << "Student information Edited successfully!" << endl;
+
+        else
+            cout << "There is an Error while removing the student!\n";
+    }
 }
 
 void Course::courseRegMenu()
-{
-    cout << "a";
-}
-
-void Attendance::attendanceMenu()
-{
-    cout << "a";
-}
-
-void Marks::marksMenu()
-{
-    cout << "a";
-}
-
-void Withdraw::courseWithdrawMenu()
 {
     cout << "a";
 }
